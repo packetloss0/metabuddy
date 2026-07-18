@@ -22,3 +22,18 @@ add_executable(MetaBuddy
 )
 
 target_link_libraries(MetaBuddy PRIVATE Qt6::Widgets PkgConfig::TAGLIB)
+
+install(TARGETS MetaBuddy DESTINATION bin)
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/MetaBuddy.desktop"
+    "[Desktop Entry]\n"
+    "Type=Application\n"
+    "Name=MetaBuddy\n"
+    "Exec=MetaBuddy\n"
+    "Icon=MetaBuddy\n"
+    "Categories=Audio;Utility;\n"
+    "Comment=Audio metadata tagger\n"
+)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/MetaBuddy.desktop"
+    DESTINATION share/applications)
