@@ -1,5 +1,5 @@
 pkgname=metabuddy
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc="Audio metadata tagger for MP3, FLAC, WAV, and AIFF files"
 arch=('x86_64')
