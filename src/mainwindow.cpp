@@ -147,23 +147,70 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
 void MainWindow::dropEvent(QDropEvent *event) {
     const auto urls = event->mimeData()->urls();
     if (urls.isEmpty()) return;
-    const QString path = urls.first().toLocalFile();
-    if (path.isEmpty()) return;
+    // const QString path = urls.first().toLocalFile();
+    // if (path.isEmpty()) return;
 
     static const QStringList imageExts =  {"png","jpg","jpeg"};
-    const QString ext = QFileInfo(path).suffix().toLower();
+    
+    QString audioPath;
+    QString imagePath;
 
-    if (imageExts.contains(ext)) {
-        if (m_currentFile.isEmpty()) {
-            QMessageBox::information(this, "Load a track first.",
-                "Drop an audio file first, then drag a cover image.");
-                return;
+    // Seperate audio files from image files.
+    for (const QUrl &url : urls) {
+        const QString path = url.toLocalFile();
+        if (path.isEmpty()) continue;
+
+        const QString ext = QFileInfo(path).suffix().toLower();
+
+        if (imageExts.contains(ext)){
+            if (imagePath.isEmpty()) { // Keep first image
+                imagePath = path;
+            }
+        } else if (TagIO::isSupported(path)){
+            if (audioPath.isEmpty()) { // Keep first audio 
+                audioPath = path;
+            }
         }
-        loadCoverImage(path);
+    }
+    // We got both
+    if(!audioPath.isEmpty() && !imagePath.isEmpty()){
+        loadFile(audioPath);
+        loadCoverImage(imagePath);
         return;
     }
-    loadFile(path);
-    // if (!path.isEmpty()) loadFile(path);
+    // We only got audio
+    if(!audioPath.isEmpty()){
+        loadFile(audioPath);
+        return;
+    }
+
+    // We only got image, try apply it to current file.
+    if (!imagePath.isEmpty()){
+        if(m_currentFile.isEmpty()) {
+            QMessageBox::information(this, "Load a track first.",
+            "Drop an audio file first, then drag a cover image.");
+            return;
+        }
+        loadCoverImage(imagePath);
+        return;
+    }
+
+    // No supported files.
+    QMessageBox::warning(this, "No supported files.",
+    "Please drop audio files (mp3, flac, aiff, wav) and/or images (png, jpg, jpeg).");
+
+
+    // if (imageExts.contains(ext)) {
+    //     if (m_currentFile.isEmpty()) {
+    //         QMessageBox::information(this, "Load a track first.",
+    //             "Drop an audio file first, then drag a cover image.");
+    //             return;
+    //     }
+    //     loadCoverImage(path);
+    //     return;
+    // }
+    // loadFile(path);
+    // // if (!path.isEmpty()) loadFile(path);
 }
 
 void MainWindow::loadFile(const QString &path) {
